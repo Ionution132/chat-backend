@@ -1,0 +1,15 @@
+{
+  "name": "chat-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "http": "^0.0.1-security",
+    "cors": "^2.8.5",
+    "socket.io": "^4.7.5"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
