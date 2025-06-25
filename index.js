@@ -8,14 +8,23 @@ const multer = require('multer');
 
 const app = express();
 const server = http.createServer(app);
+const ALLOWED_ORIGIN = "https://chat-frontendskillbarracks.netlify.app";
+
+app.use(cors({
+  origin: ALLOWED_ORIGIN,
+  methods: ["GET", "POST"],
+  credentials: true
+}));
+
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"]
+    origin: ALLOWED_ORIGIN,
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
-app.use(cors());
+
 app.use(express.json()); // For parsing JSON bodies
 
 // 1. Serve static files in /uploads
