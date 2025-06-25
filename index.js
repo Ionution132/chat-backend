@@ -10,19 +10,34 @@ const app = express();
 const server = http.createServer(app);
 const ALLOWED_ORIGIN = "https://chat-frontendskillbarracks.netlify.app";
 
+const allowedOrigins = [
+  "https://chat-frontendskillbarracks.netlify.app",
+  "https://skillbarracks.com" // <-- change to your real WordPress domain
+];
+
 app.use(cors({
-  origin: "*",
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ["GET", "POST"],
   credentials: true
 }));
 
+
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true
   }
 });
+
 
 
 app.use(express.json()); // For parsing JSON bodies
