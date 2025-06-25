@@ -11,14 +11,14 @@ const server = http.createServer(app);
 const ALLOWED_ORIGIN = "https://chat-frontendskillbarracks.netlify.app";
 
 app.use(cors({
-  origin: ALLOWED_ORIGIN,
+  origin: "*",
   methods: ["GET", "POST"],
   credentials: true
 }));
 
 const io = new Server(server, {
   cors: {
-    origin: ALLOWED_ORIGIN,
+    origin: "*",
     methods: ["GET", "POST"],
     credentials: true
   }
