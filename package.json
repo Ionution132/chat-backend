@@ -1,15 +1,18 @@
 {
-  "name": "chat-backend",
+  "name": "server",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT",
-  "dependencies": {
-    "express": "^4.18.2",
-    "http": "^0.0.1-security",
-    "cors": "^2.8.5",
-    "socket.io": "^4.7.5"
-  },
   "scripts": {
-    "start": "node index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "multer": "^2.0.1",
+    "socket.io": "^4.8.1"
   }
 }

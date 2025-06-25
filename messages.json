@@ -1,0 +1,57 @@
+[
+  {
+    "username": "john",
+    "text": "helllo",
+    "time": "14:46",
+    "date": "9 Jun 2025"
+  },
+  {
+    "username": "john",
+    "text": "man",
+    "time": "14:46",
+    "date": "9 Jun 2025"
+  },
+  {
+    "username": "john",
+    "text": "is this johnson?",
+    "time": "14:47",
+    "date": "9 Jun 2025"
+  },
+  {
+    "username": "patrick",
+    "text": "no, this is patrick",
+    "time": "14:47",
+    "date": "9 Jun 2025"
+  },
+  {
+    "username": "John",
+    "text": "im john but with J",
+    "time": "14:47",
+    "date": "9 Jun 2025"
+  },
+  {
+    "username": "marioara",
+    "text": "hello",
+    "time": "14:48",
+    "date": "9 Jun 2025"
+  },
+  {
+    "username": "Nelu",
+    "text": "buna",
+    "time": "15:03",
+    "date": "9 Jun 2025"
+  },
+  {
+    "username": "Johnny",
+    "text": "hey",
+    "time": "15:51",
+    "date": "16 Jun 2025"
+  },
+  {
+    "room": "UI Development",
+    "username": "Johnny",
+    "text": "hello",
+    "time": "16:16",
+    "date": "16 Jun 2025"
+  }
+]
