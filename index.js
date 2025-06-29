@@ -5,6 +5,9 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const { Pool } = require('pg');
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+
 
 const app = express();
 const server = http.createServer(app);
@@ -74,21 +77,13 @@ app.get('/', (req, res) => {
   res.send("Server is running");
 });
 
-// 4. Chat logic (with NO LINKS in promotions restriction)
-const HISTORY_FILE = path.join(__dirname, 'messages.json');
-let roomMessages = {};
-if (fs.existsSync(HISTORY_FILE)) {
-  roomMessages = JSON.parse(fs.readFileSync(HISTORY_FILE));
-}
-const saveMessages = () => {
-  fs.writeFileSync(HISTORY_FILE, JSON.stringify(roomMessages, null, 2));
-};
 
 io.on('connection', (socket) => {
   console.log(`⚡: User connected ${socket.id}`);
   socket.currentRoom = null;
 
-  socket.on('join room', (room) => {
+  // 1. Join room: fetch history from Neon
+  socket.on('join room', async (room) => {
     if (socket.currentRoom) {
       socket.leave(socket.currentRoom);
     }
@@ -96,47 +91,56 @@ io.on('connection', (socket) => {
     socket.join(room);
     console.log(`🛏️: ${socket.id} joined room ${room}`);
 
-    if (!roomMessages[room]) {
-      roomMessages[room] = [];
+    try {
+      // Fetch last 100 messages for this room, oldest first
+      const { rows } = await pool.query(
+        'SELECT * FROM messages WHERE room = $1 ORDER BY id ASC LIMIT 100',
+        [room]
+      );
+      socket.emit('chat history', rows);
+    } catch (err) {
+      console.error('Error fetching messages:', err);
+      socket.emit('chat history', []);
     }
-    socket.emit('chat history', roomMessages[room]);
   });
 
-socket.on('chat message', (msg) => {
-  const targetRoom = msg.room || socket.currentRoom;
-  if (!targetRoom) return;
+  // 2. Handle chat message: save to Neon and broadcast
+  socket.on('chat message', async (msg) => {
+    const targetRoom = msg.room || socket.currentRoom;
+    if (!targetRoom) return;
 
-  // Universal link detector: http, https, www., or anything.something
-  const linkRegex = /(?:https?:\/\/|www\.|[a-zA-Z0-9-]+\.[a-zA-Z]{2,})(\/\S*)?/gi;
+    // Universal link detector: http, https, www., or anything.something
+    const linkRegex = /(?:https?:\/\/|www\.|[a-zA-Z0-9-]+\.[a-zA-Z]{2,})(\/\S*)?/gi;
 
-  if (targetRoom === 'promotion' && linkRegex.test(msg.text)) {
-    console.log('LINK DETECTED AND BLOCKED:', msg.text);
-    socket.emit('error-message', 'No links are allowed in the Promotion chat!');
-    return; // Block message
-  }
+    if (targetRoom === 'promotion' && linkRegex.test(msg.text)) {
+      console.log('LINK DETECTED AND BLOCKED:', msg.text);
+      socket.emit('error-message', 'No links are allowed in the Promotion chat!');
+      return;
+    }
 
-  roomMessages[targetRoom] = roomMessages[targetRoom] || [];
-  roomMessages[targetRoom].push(msg);
-
-  if (roomMessages[targetRoom].length > 100) {
-    roomMessages[targetRoom].shift();
-  }
-
-  saveMessages();
-
-  console.log(`📤 [${targetRoom}] Broadcasting message:`);
-  console.log(JSON.stringify(msg, null, 2));
-
-  io.to(targetRoom).emit('chat message', msg);
-});
-
-
-
+    try {
+      await pool.query(
+        'INSERT INTO messages (room, username, text, image, time, date) VALUES ($1, $2, $3, $4, $5, $6)',
+        [
+          targetRoom,
+          msg.username,
+          msg.text,
+          msg.image,
+          msg.time,
+          msg.date
+        ]
+      );
+      io.to(targetRoom).emit('chat message', msg);
+    } catch (err) {
+      console.error('Error saving message:', err);
+    }
+  });
 
   socket.on('disconnect', () => {
     console.log(`🔥: User disconnected ${socket.id}`);
   });
 });
+
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
